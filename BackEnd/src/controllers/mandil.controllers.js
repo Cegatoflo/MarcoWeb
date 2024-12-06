@@ -1,9 +1,19 @@
 import Mandil from '../models/mandil.model.js';
 
-// Crear un nuevo mandil
 export const createMandil = async (req, res) => {
     try {
-        const mandil = new Mandil(req.body);
+        const lastMandil = await Mandil.findOne().sort({ _id: -1 }).exec();
+        const lastId = lastMandil ? lastMandil.id_mandil : 'mandil_000';
+
+        const numberPart = parseInt(lastId.split('_')[1], 10);
+        const newId = `mandil_${String(numberPart + 1).padStart(3, '0')}`;
+
+        const mandil = new Mandil({
+            ...req.body,
+            id: newId,
+            estado: false, 
+        });
+
         await mandil.save();
         res.status(201).json(mandil);
     } catch (error) {
@@ -78,11 +88,16 @@ export const searchMandilesByColor = async (req, res) => {
     }
 };
 
-// Buscar mandiles por estado
 export const searchMandilesByEstado = async (req, res) => {
     try {
         const { estado } = req.query;
-        const estadoBool = estado === 'true'; // Convierto string a booleano
+
+        if (estado === undefined) {
+            const mandiles = await Mandil.find();
+            return res.status(200).json(mandiles);
+        }
+
+        const estadoBool = estado === 'true';
         const mandiles = await Mandil.find({ estado: estadoBool });
         res.status(200).json(mandiles);
     } catch (error) {

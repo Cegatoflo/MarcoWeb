@@ -7,21 +7,27 @@ export function Inventoryview() {
     const [inventoryItems, setInventoryItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [estadoFilter, setEstadoFilter] = useState(''); // '' (todos), 'true', 'false'
     const [mandilData, setMandilData] = useState({
-        id: '',
         seccion: '',
         ubicacion: '',
         color: 'rojo', // Valor por defecto
-        estado: false // Siempre será false al agregar
     });
 
     useEffect(() => {
         fetchInventory();
-    }, []);
+    }, [estadoFilter]); // Recargar cuando cambie el filtro de estado
 
     const fetchInventory = async () => {
         try {
-            const response = await axios.get('https://pyfjs.onrender.com/api/mandil/mandiles', { withCredentials: true });
+            const params = {};
+            if (estadoFilter) params.estado = estadoFilter;
+
+            const response = await axios.get('https://pyfjs.onrender.com/api/mandil/mandiles', {
+                params,
+                withCredentials: true,
+            });
+
             setInventoryItems(response.data);
         } catch (error) {
             console.error("Error fetching inventory", error);
@@ -31,11 +37,9 @@ export function Inventoryview() {
     const handleEditItem = (item) => {
         setSelectedItem(item);
         setMandilData({
-            id: item.id,
             seccion: item.seccion,
             ubicacion: item.ubicacion,
             color: item.color,
-            estado: item.estado // Mantener el estado actual
         });
         setModalVisible(true);
     };
@@ -43,7 +47,7 @@ export function Inventoryview() {
     const handleDeleteItem = async (id) => {
         try {
             await axios.delete(`https://pyfjs.onrender.com/api/mandil/mandiles/${id}`, { withCredentials: true });
-            setInventoryItems(inventoryItems.filter(item => item._id !== id));
+            fetchInventory();
         } catch (error) {
             console.error("Error deleting item", error);
         }
@@ -51,7 +55,7 @@ export function Inventoryview() {
 
     const handleSubmit = async () => {
         // Validar que todos los campos estén completos
-        if (!mandilData.id || !mandilData.seccion || !mandilData.ubicacion || !mandilData.color) {
+        if (!mandilData.seccion || !mandilData.ubicacion || !mandilData.color) {
             alert("Por favor, complete todos los campos.");
             return;
         }
@@ -68,7 +72,7 @@ export function Inventoryview() {
         } else {
             // Crear mandil
             try {
-                await axios.post('https://pyfjs.onrender.com/api/mandil/mandiles', { ...mandilData, estado: false }, { withCredentials: true });
+                await axios.post('https://pyfjs.onrender.com/api/mandil/mandiles', mandilData, { withCredentials: true });
                 fetchInventory();
                 resetForm();
             } catch (error) {
@@ -80,7 +84,7 @@ export function Inventoryview() {
     const resetForm = () => {
         setModalVisible(false);
         setSelectedItem(null);
-        setMandilData({ id: '', seccion: '', ubicacion: '', color: 'rojo', estado: false });
+        setMandilData({ seccion: '', ubicacion: '', color: 'rojo' });
     };
 
     const filteredItems = inventoryItems.filter(item =>
@@ -108,6 +112,14 @@ export function Inventoryview() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
+                    <select
+                        value={estadoFilter}
+                        onChange={(e) => setEstadoFilter(e.target.value)}
+                    >
+                        <option value="">Todos</option>
+                        <option value="true">No disponibles</option>
+                        <option value="false">Disponibles</option>
+                    </select>
                 </div>
 
                 <div>
@@ -116,7 +128,7 @@ export function Inventoryview() {
                         {Object.keys(mandilCountsByColor).map(color => (
                             <div key={color} style={{ backgroundColor: color, padding: '10px', color: 'white' }}>
                                 {color}: Cantidad: {mandilCountsByColor[color]}
- </div>
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -137,7 +149,7 @@ export function Inventoryview() {
                             {filteredItems.length > 0 ? (
                                 filteredItems.map((item) => (
                                     <tr key={item._id}>
-                                        <td>{item.id}</td>
+                                        <td>{item.id_mandil}</td>
                                         <td>{item.seccion}</td>
                                         <td>{item.ubicacion}</td>
                                         <td>{item.color}</td>
@@ -150,7 +162,7 @@ export function Inventoryview() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6">No se encontraron mandiles para el color buscado.</td>
+                                    <td colSpan="6">No se encontraron mandiles para el color o estado seleccionado.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -164,15 +176,6 @@ export function Inventoryview() {
                             <span onClick={resetForm} style={{ cursor: 'pointer', float: 'right', fontSize: '20px' }}>&times;</span>
                             <h2>{selectedItem ? "Editar Mandil" : "Agregar Mandil"}</h2>
                             <form>
-                                <div>
-                                    <label>ID</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ingrese el ID"
-                                        value={mandilData.id}
-                                        onChange={(e) => setMandilData({ ...mandilData, id: e.target.value })}
-                                    />
-                                </div>
                                 <div>
                                     <label>Sección</label>
                                     <input
