@@ -1,0 +1,91 @@
+.top-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px;
+    background: #21222D;
+    color: white;
+    border-radius: 10px;
+    margin: 10px;
+}
+.top-container h1{
+    padding-left: 20px ;
+
+}
+.top-container-items{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    color: white;
+    border-radius: 10px;
+    margin: 10px;
+}
+.Card{
+    width: 20%;
+    border: 1px;
+    border-radius: 10px;
+    background-color: #171821;
+    justify-content: center;
+}
+
+.Card-items{
+    padding: 10px;
+    color: white;
+    text-align: center;
+}
+.Card-img-container{
+    display: flex;
+    justify-content: center;
+    padding: 5px;
+}
+.Card-img-container img{
+    width: 20%;
+    height: 25%;
+}
+
+.progress-bar-container {
+    width: 100%;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 10px;
+}
+
+.progress-bar {
+    height: 10px;
+    background-color: #4caf50;
+    text-align: center;
+    line-height: 10px;
+    color: white;
+    border-radius: 5px;
+}
+
+.home-table{
+    padding: 30px;
+    border-collapse: collapse;
+}
+
+.home-table th, .home-table td{
+    border-bottom: 1px solid white;
+}
+.home-table tbody tr td{
+    padding: 10px;
+}
+
+.big-card{
+    width: 100%;
+    border: 1px;
+    border-radius: 10px;
+    background-color: #171821;
+    justify-content: center;
+    margin: 10px;
+    padding: 30px;
+}
+.big-card h2{
+    padding-left: 20px ;
+    color: white;
+}
+
+.big-card p{
+    padding: 20px ;
+    color: white;
+}

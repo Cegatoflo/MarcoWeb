@@ -1,0 +1,147 @@
+body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+}
+.general-container{
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.Right{
+    width: 85%;
+    height: 100%;
+    background-color: #171821;
+    padding: 20px;
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.Right::-webkit-scrollbar {
+    width: 10px;
+}
+.Right::-webkit-scrollbar-track {
+    background: #2e2f3a; 
+}
+
+.Right::-webkit-scrollbar-thumb {
+    background: #4caf50;
+    border-radius: 10px;
+    border: 3px solid #2e2f3a; 
+}
+
+.Right::-webkit-scrollbar-thumb:hover {
+    background: #45a049; 
+}
+
+.title-container{
+    color: #fff;
+    font-size: 1em;
+    margin: 0;
+    width: 100%;
+    margin-bottom: 10px;
+}
+.title-container h1{
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.full-width-container{
+    width: 100%;
+    padding: 20px;
+    background-color:#21222D ;
+    display: flex;
+    flex-direction: column;
+    border: 1px;
+    border-radius: 20px;
+    align-items: center;
+    align-items: center;
+}
+
+.general-table{
+    width: 100%;
+    border: 1px solid white;
+    border-radius: 10px;
+    border-collapse: collapse;
+}
+
+.general-table th{
+    background-color: #00838F;
+    color: white;
+    text-align: center;
+    
+}
+.general-table td{
+    text-align: center;
+    vertical-align: middle;
+    color: black;
+    border-top: 1px solid white;
+}
+
+.general-table tbody tr{
+    background-color: #B3E5FC;
+}
+
+.general-table tbody tr:hover{
+    background-color: #FFF9C4;
+}
+
+.general-table tbody tr td button{
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.general-table tbody tr td button:hover{
+    background-color: #45a049;
+}
+
+.add-to-table{ 
+    background-color: #EF6C00;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    display: block;
+}
+.add-to-table:hover{
+    background-color: #D84315;
+}
+.btn-update, .btn-delete {
+    margin-right: 10px; 
+}
+.buscador{
+    color: #fff;
+    font-size: 1.2em;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.buscador P{
+    margin: 0;
+}
+
+.buscador input{
+    width: 50%;
+    padding: 8px;
+    box-sizing: border-box;
+}
