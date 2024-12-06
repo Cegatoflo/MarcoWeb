@@ -13,7 +13,6 @@ export function App() {
                     <Route path="/register" element={<FullFormsPage formType="register" />} />
                     <Route path="/recuperar" element={<FullFormsPage formType="recuperar" />} />
                     <Route path="/menu" element={<PrivateRoute><Dashboard rightType="home" /></PrivateRoute>}/>
-                    <Route path="/menu/productos" element={<PrivateRoute><Dashboard rightType="productos"/></PrivateRoute>}/>
                     <Route path="/menu/clientes" element={<PrivateRoute><Dashboard rightType="clientes"/></PrivateRoute>}/>
                     <Route path="/menu/ordenes" element={<PrivateRoute><Dashboard rightType="ordenes"/></PrivateRoute>}/>
                     <Route path="/menu/inventario" element={<PrivateRoute><Dashboard rightType="inventario"/></PrivateRoute>}/>
