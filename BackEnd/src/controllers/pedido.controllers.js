@@ -184,6 +184,7 @@ export const generatePedidoPDF = async (req, res) => {
         // Finalizar el documento
         doc.end();
     } catch (error) {
+        console.error("Error generating PDF:", error); // Agregar un log para ver el error
         res.status(500).json({ error: error.message });
     }
 };

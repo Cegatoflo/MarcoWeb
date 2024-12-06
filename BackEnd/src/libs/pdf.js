@@ -17,7 +17,7 @@ export const crearDocumentoPDF = (pedido) => {
     // Agrupar mandiles por color
     const mandilesPorColor = {};
     pedido.mandiles.forEach(mandil => {
-        const color = mandil.color;
+        const color = mandil.color; // Asegúrate de que 'color' esté en el modelo de mandil
         if (!mandilesPorColor[color]) {
             mandilesPorColor[color] = 0;
         }

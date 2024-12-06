@@ -1,164 +1,214 @@
-import React, { useState, useEffect } from 'react';
 import { Helmet } from "react-helmet";
-import axios from 'axios';
 import { OrdersRow } from "../../Components/OrdersRow";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export function Orderviews() {
     const [orders, setOrders] = useState([]);
     const [mandiles, setMandiles] = useState([]);
     const [selectedMandiles, setSelectedMandiles] = useState([]);
-    const [cliente, setCliente] = useState('');
-    const [fecha, setFecha] = useState('');
-    const [estado, setEstado] = useState('');
     const [ruc, setRuc] = useState('');
-
-    // Base URL de la API
-    const apiUrl = "https://pyfjs.onrender.com";
+    const [searchTerm, setSearchTerm] = useState('');
+    const [estadoFilter, setEstadoFilter] = useState('');
+    const [showMandilesPanel, setShowMandilesPanel] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null); // Estado para el pedido seleccionado
 
     useEffect(() => {
-        // Obtener pedidos
-        axios.get(`${apiUrl}/pedidos`)
-            .then(response => setOrders(response.data))
-            .catch(error => console.error('Error al obtener pedidos:', error));
-        
-        // Obtener mandiles disponibles (estado = false)
-        axios.get(`${apiUrl}/mandiles/search/estado?estado=false`)
-            .then(response => setMandiles(response.data))
-            .catch(error => console.error('Error al obtener mandiles:', error));
+        fetchOrders();
+        fetchMandiles();
     }, []);
 
-    // Función para manejar la selección de mandiles
-    const handleSelectMandil = (mandilId) => {
-        const mandil = mandiles.find(m => m.idMandil === mandilId);
-        setSelectedMandiles(prevSelected => [...prevSelected, mandil]);
-    };
-
-    // Función para crear un nuevo pedido
-    const handleCreateOrder = async () => {
-        const newOrder = {
-            cliente,
-            fecha,
-            estado,
-            mandiles: selectedMandiles,
-            ruc,
-        };
-
+    const fetchOrders = async () => {
         try {
-            const response = await axios.post(`${apiUrl}/pedidos`, newOrder);
-            setOrders([...orders, response.data]);
-            alert('Pedido creado con éxito');
-        } catch (error) {
-            console.error('Error al crear pedido:', error);
-        }
-    };
-
-    // Función para buscar pedidos por RUC
-    const handleSearchByRuc = async () => {
-        try {
-            const response = await axios.get(`${apiUrl}/pedidos/search/ruc`, { params: { ruc } });
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos', { withCredentials: true });
             setOrders(response.data);
         } catch (error) {
-            console.error('Error al buscar por RUC:', error);
+            console.error("Error fetching orders", error);
         }
     };
 
-    // Función para buscar pedidos por fecha
-    const handleSearchByFecha = async () => {
+    const fetchMandiles = async () => {
         try {
-            const response = await axios.get(`${apiUrl}/pedidos/search/fecha`, { params: { fecha } });
+            const response = await axios.get('https://pyfjs.onrender.com/api/mandil/mandiles', {
+                params: { estado: 'false' }, // Solo mandiles disponibles
+                withCredentials: true,
+            });
+            setMandiles(response.data);
+        } catch (error) {
+            console.error("Error fetching mandiles", error);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const newPedido = {
+                ruc,
+                mandiles: selectedMandiles,
+            };
+            await axios.post('https://pyfjs.onrender.com/api/pedido/pedidos', newPedido, { withCredentials: true });
+            alert('Pedido creado exitosamente');
+            setSelectedMandiles([]); // Resetear selección
+            setRuc(''); // Resetear RUC
+            setShowMandilesPanel(false); // Ocultar el panel de mandiles
+            fetchOrders(); // Volver a obtener las órdenes después de agregar un nuevo pedido
+        } catch (error) {
+            console.error("Error creating pedido", error);
+        }
+    };
+
+    const handleSearch = async () => {
+        try {
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos/search/ruc', {
+                params: { ruc: searchTerm },
+                withCredentials: true,
+            });
             setOrders(response.data);
         } catch (error) {
-            console.error('Error al buscar por fecha:', error);
+            console.error("Error searching orders", error);
         }
     };
 
-    // Función para generar PDF de un pedido
-    const handleGeneratePDF = async (idPedido) => {
+    const handleFilterByEstado = async () => {
         try {
-            const response = await axios.get(`${apiUrl}/pedidos/${idPedido}/pdf`, { responseType: 'blob' });
-            const file = new Blob([response.data], { type: 'application/pdf' });
-            const fileURL = URL.createObjectURL(file);
-            window.open(fileURL);
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos/search/estado', {
+                params: { estado: estadoFilter },
+                withCredentials: true,
+            });
+            setOrders(response.data);
         } catch (error) {
-            console.error('Error al generar PDF:', error);
+            console.error("Error filtering orders", error);
+        }
+    };
+
+    const handleGeneratePDF = async (id) => {
+        try {
+            const response = await axios.get(`https://pyfjs.onrender.com/api/pedido/pedidos/${id}/pdf`, {
+                responseType: 'blob', // Para manejar el PDF
+                withCredentials: true,
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `pedido-${id}.pdf`); // Nombre del archivo
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Error generating PDF", error);
+        }
+    };
+
+    const handleDeleteOrder = async (id) => {
+        try {
+            await axios.delete(`https://pyfjs.onrender.com/api/pedido/pedidos/${id}`, { withCredentials: true });
+            alert('Pedido eliminado exitosamente');
+            fetchOrders(); // Volver a obtener las órdenes después de eliminar
+        } catch (error) {console.error("Error deleting order", error);
+        }
+    };
+
+    const toggleOrderDetails = (order) => {
+        if (selectedOrder && selectedOrder.idPedido === order.idPedido) {
+            setSelectedOrder(null); // Cerrar detalles si ya está abierto
+        } else {
+            setSelectedOrder(order); // Abrir detalles del nuevo pedido
         }
     };
 
     return (
-        <>
+        <div>
             <Helmet>
-                <title>Órdenes | TOTOS</title>
+                <title>Órdenes</title>
             </Helmet>
-            <div className="title-container">
-                <h1>Órdenes</h1>
-            </div>
-            <div className="full-width-container">
-                <div className="buscador">
-                    <p>Filtrar por: </p>
-                    <input
-                        type="text"
-                        placeholder="Busca por: Nombre del cliente o ID del pedido"
-                        value={cliente}
-                        onChange={(e) => setCliente(e.target.value)}
-                    />
-                    <input
-                        type="date"
-                        value={fecha}
-                        onChange={(e) => setFecha(e.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="Filtrar por RUC"
-                        value={ruc}
-                        onChange={(e) => setRuc(e.target.value)}
-                    />
-                    <button onClick={handleSearchByRuc}>Buscar por RUC</button>
-                    <button onClick={handleSearchByFecha}>Buscar por Fecha</button>
-                    <button onClick={handleCreateOrder}>Agregar Orden</button>
-                </div>
-                <table className="general-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Cliente</th>
-                            <th>Fecha</th>
-                            <th>Estado</th>
-                            <th>Detalles</th>
-                            <th>Generar PDF</th>
+            <h1>Lista de Órdenes</h1>
+            <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por RUC"
+            />
+            <button onClick={handleSearch}>Buscar</button>
+            <button onClick={handleFilterByEstado}>Filtrar por Estado</button>
+            <button onClick={() => setShowMandilesPanel(true)}>Agregar Pedido</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {orders.map(order => (
+                        <tr key={order.idPedido}>
+                            <td>{order.idPedido}</td>
+                            <td>{order.ruc}</td>
+                            <td>{order.fechaPedido}</td>
+                            <td>{order.estado}</td>
+                            <td>
+                                <button onClick={() => toggleOrderDetails(order)}>Detalles</button>
+                                <button onClick={() => handleGeneratePDF(order.idPedido)}>Descargar PDF</button>
+                                <button onClick={() => handleDeleteOrder(order.idPedido)}>Eliminar</button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {orders.map((order) => (
-                            <OrdersRow
-                                key={order.idPedido}
-                                ID={order.idPedido}
-                                Cliente={order.cliente}
-                                Fecha={order.fecha}
-                                Estado={order.estado}
-                                onGeneratePDF={() => handleGeneratePDF(order.idPedido)}
-                            />
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                    ))}
+                </tbody>
+            </table>
 
-            {/* Modal para selección de mandiles */}
-            <div className="mandil-selection-modal">
-                <h2>Selecciona los mandiles para el pedido</h2>
-                <ul>
-                    {mandiles.map(mandil => (
-                        <li key={mandil.idMandil}>
-                            <label>
+            {selectedOrder && (
+                <div className="order-details-panel">
+                    <h2>Detalles del Pedido</h2>
+                    <p><strong>ID:</strong> {selectedOrder.idPedido}</p>
+                    <p><strong>Cliente:</strong> {selectedOrder.ruc}</p>
+                    <p><strong>Fecha:</strong> {selectedOrder.fechaPedido}</p>
+                    <p><strong>Estado:</strong> {selectedOrder.estado}</p>
+                    <p><strong>Mandiles Seleccionados:</strong></p>
+                    <ul>
+                        {selectedOrder.mandiles.map(mandil => (
+                            <li key={mandil.id}>
+                                {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={() => setSelectedOrder(null)}>Cerrar</button>
+                </div>
+            )}
+
+            {showMandilesPanel && (
+                <div className="mandiles-panel">
+                    <h2>Agregar Pedido</h2>
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            value={ruc}
+                            onChange={(e) => setRuc(e.target.value)}
+                            placeholder="Ingrese RUC"
+                            required
+                        />
+                        <h3>Seleccionar Mandiles</h3>
+                        {mandiles.map(mandil => (
+                            <div key={mandil.id}>
                                 <input
                                     type="checkbox"
-                                    onChange={() => handleSelectMandil(mandil.idMandil)}
+                                    value={mandil.id}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedMandiles([...selectedMandiles, mandil.id]);
+                                        } else {
+                                            setSelectedMandiles(selectedMandiles.filter(id => id !== mandil.id));
+                                        }
+                                    }}
                                 />
-                                {mandil.descripcion}
-                            </label>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </>
+                                {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
+                            </div>
+                        ))}
+                        <button type="submit">Agregar Pedido</button>
+                        <button type="button" onClick={() => setShowMandilesPanel(false)}>Cancelar</button>
+                    </form>
+                </div>
+            )}
+        </div>
     );
 }
