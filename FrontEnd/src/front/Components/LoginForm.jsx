@@ -30,7 +30,7 @@ export function LoginForm() {
             navigate('/menu'); // Navega a la página de menú después del inicio de sesión exitoso
         } catch (err) {
             setError(err.response?.data?.message || 'Error en el inicio de sesión');
-            console.error('Error en el inicio de sesión:', err); 
+            console.error('Error en el inicio de sesión:', err);
         }
     };
 
@@ -74,9 +74,13 @@ export function LoginForm() {
                     />
                     {error && <div className="error-message">{error}</div>}
                     {infoMessage && <div className="info-message">{infoMessage}</div>}
-                    <button type="button" className="linksForm" onClick={handleForgotPassword}>
+                    {/* <button type="button" className="linksForm saliente" onClick={handleForgotPassword}>
                         Olvidé mi contraseña
-                    </button>
+                    </button> */}
+                    <div className='linksc'>
+                    <a href="/recuperar" className="linksForm" onClick={handleForgotPassword}>
+                        Olvidé mi contraseña
+                    </a></div>
                     <button type="submit">Iniciar sesión</button>
                     <label>¿Aún no tienes una cuenta? <a href="/register">Regístrate</a></label>
                 </form>

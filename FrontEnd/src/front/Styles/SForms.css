@@ -66,9 +66,22 @@
     box-sizing: border-box;
 }
 
-.linksForm {
+.linksc{
     display: block;
     margin-bottom: 15px;
+    border: none;
+    background-color: transparent;
+    width: auto;
+    text-decoration: none;
+    color: #007bff;
+    text-decoration: none;
+    text-align: center;
+}
+.linksForm {
+    margin-bottom: 15px;
+    border: none;
+    background-color: transparent;
+    text-decoration: none;
     color: #007bff;
     text-decoration: none;
     text-align: center;
@@ -98,4 +111,11 @@
     margin-top: 15px;
     text-align: left;
     color: white;
+}
+
+.error-message{
+    text-align: center;
+    width: auto;
+    background-color: transparent;
+    color: red;
 }
