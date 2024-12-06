@@ -1,4 +1,3 @@
-// c:\Users\ASUS\Documents\GitHub\PYFJS\BackEnd\src\models\pedido.models.js
 import mongoose from "mongoose";
 
 const pedidoSchema = new mongoose.Schema({
@@ -13,8 +12,7 @@ const pedidoSchema = new mongoose.Schema({
         trim: true
     },
     mandiles: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Mandil', 
+        type: String, 
         required: true,
     }],
     estado: {

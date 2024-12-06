@@ -124,51 +124,53 @@ export function Inventoryview() {
 
                 <div>
                     <h3>Resumen de Mandiles por Color</h3>
-                    <div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                         {Object.keys(mandilCountsByColor).map(color => (
-                            <div key={color} style={{ backgroundColor: color, padding: '10px', color: 'white' }}>
-                                {color}: Cantidad: {mandilCountsByColor[color]}
+                            <div key={color} style={{ margin: '10px', padding: '20px', backgroundColor: color, color: 'white', borderRadius: '10px', width: '150px', textAlign: 'center' }}>
+                                <h4>{color.charAt(0).toUpperCase() + color.slice(1)}</h4>
+                                <p>Cantidad: {mandilCountsByColor[color]}</p>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 <div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Sección</th>
-                                <th>Ubicación</th>
-                                <th>Color</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredItems.length > 0 ? (
-                                filteredItems.map((item) => (
-                                    <tr key={item._id}>
-                                        <td>{item.id}</td>
-                                        <td>{item.seccion}</td>
-                                        <td>{item.ubicacion}</td>
-                                        <td>{item.color}</td>
-                                        <td>{item.estado ? 'No disponible' : 'Disponible'}</td>
-                                        <td>
-                                            <button onClick={() => handleEditItem(item)}>Editar</button>
-                                            <button onClick={() => handleDeleteItem(item._id)}>Eliminar</button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="6">No se encontraron mandiles para el color o estado seleccionado.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    <button onClick={() => setModalVisible(true)}>Agregar Mandil</button>
-                </div>
+    <h3>Mandiles Disponibles</h3>
+    <div>
+        {filteredItems.length > 0 ? (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                    <tr>
+                        <th>Sección</th>
+                        <th>Ubicación</th>
+                        <th>Color</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredItems.map((item) => (
+                        <tr key={item._id}>
+                            <td>{item.id}</td>
+                            <td>{item.seccion}</td>
+                            <td>{item.ubicacion}</td>
+                            <td>{item.color.charAt(0).toUpperCase() + item.color.slice(1)}</td>
+                            <td>{item.estado ? 'No disponible' : 'Disponible'}</td>
+                            <td>
+                                <button onClick={() => handleEditItem(item)}>Editar</button>
+                                <button onClick={() => handleDeleteItem(item._id)}>Eliminar</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        ) : (
+            <p>No se encontraron mandiles para el color o estado seleccionado.</p>
+        )}
+    </div>
+    <button onClick={() => setModalVisible(true)}>Agregar Mandil</button>
+</div>
+
 
                 {modalVisible && (
                     <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>

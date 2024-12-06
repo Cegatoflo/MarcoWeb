@@ -1,24 +1,32 @@
-import * as yup from 'yup';
+import mongoose from 'mongoose';
 
-export const pedidoSchema = yup.object().shape({
-    idPedido: yup
-        .string()
-        .required("El ID de pedido es obligatorio")
-        .trim(),
-    ruc: yup
-        .string()
-        .required("El RUC es obligatorio")
-        .trim()
-        .matches(/^\d{8}$|^\d{11}$/, "El RUC debe tener 8 dígitos (personal) o 11 dígitos (empresa)"),
-    mandiles: yup
-        .array()
-        .of(yup.string().required("El ID de mandil es obligatorio")) 
-        .required("Se requiere al menos un mandil"),
-    estado: yup
-        .string()
-        .oneOf(['pendiente', 'en_proceso', 'completado', 'cancelado'], "Estado inválido") 
-        .default('pendiente'), 
-    fechaPedido: yup
-        .date()
-        .default(() => new Date()), 
+const pedidoSchema = new mongoose.Schema({
+    idPedido: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    ruc: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    mandiles: [{
+        type: String,
+        required: true
+    }],
+    estado: {
+        type: String,
+        enum: ['pendiente', 'en_proceso', 'completado', 'cancelado'],
+        default: 'pendiente'
+    },
+    fechaPedido: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true,
+    versionKey: false
 });
+
+export default mongoose.model('Pedido', pedidoSchema);

@@ -1,23 +1,65 @@
 import Pedido from '../models/pedido.models.js';
 import { crearDocumentoPDF } from '../libs/pdf.js';
+import Mandil from '../models/mandil.model.js';
 
-// Crear un nuevo pedido
+
 export const createPedido = async (req, res) => {
     try {
-        const pedido = new Pedido(req.body);
+        // Buscar el pedido con el ID más reciente
+        const lastPedido = await Pedido.findOne().sort({ _id: -1 }).exec();
+        const lastId = lastPedido ? lastPedido.idPedido : 'P0000';  // Default a 'P0000' si no existe ningún pedido
+
+        // Verificar si el ID tiene el formato esperado
+        const idPrefix = lastId.slice(0, 1);  // Extraer la letra (P)
+        const numberPart = parseInt(lastId.slice(1), 10);  // Extraer el número
+
+        if (idPrefix !== 'P' || isNaN(numberPart)) {
+            // Si el ID no tiene el formato correcto, se empieza con 'P0001'
+            console.log('ID inicial inválido, generando desde P0001');
+            const newIdPedido = `P0001`;  // Comienza desde P0001 en lugar de P0000
+            const pedido = new Pedido({
+                ...req.body,
+                idPedido: newIdPedido,  // Usar el nuevo ID generado
+            });
+
+            // Guardar el pedido
+            await pedido.save();
+
+            // Actualizar el estado de los mandiles a "no disponible" (true) usando el campo id de mandil
+            await Mandil.updateMany(
+                { id: { $in: pedido.mandiles } },  // Buscamos mandiles por el campo id
+                { $set: { estado: true } }
+            );
+
+            return res.status(201).json(pedido);
+        }
+
+        // Generar el nuevo ID (incrementando el número)
+        const newIdPedido = `P${String(numberPart + 1).padStart(4, '0')}`;
+
+        // Crear el nuevo pedido con el ID generado
+        const pedido = new Pedido({
+            ...req.body,
+            idPedido: newIdPedido,  // Usar el nuevo ID generado
+        });
+
+        // Guardar el pedido
         await pedido.save();
 
-        // Actualizar el estado de los mandiles a "no disponible" (true)
+        // Actualizar el estado de los mandiles a "no disponible" (true) usando el campo id de mandil
         await Mandil.updateMany(
-            { _id: { $in: pedido.mandiles } },
+            { id: { $in: pedido.mandiles } },  // Buscamos mandiles por el campo id
             { $set: { estado: true } }
         );
 
+        // Enviar la respuesta con el pedido creado
         res.status(201).json(pedido);
     } catch (error) {
+        // Enviar error en caso de fallo
         res.status(400).json({ error: error.message });
     }
 };
+
 
 // Obtener todos los pedidos
 export const getPedidos = async (req, res) => {
@@ -101,6 +143,24 @@ export const searchPedidosByRuc = async (req, res) => {
     }
 };
 
+// Buscar pedidos por fecha
+export const searchPedidosByFecha = async (req, res) => {
+    try {
+        const { fechaInicio, fechaFin } = req.query;
+
+        if (!fechaInicio || !fechaFin) {
+            return res.status(400).json({ error: 'Los parámetros de fechaInicio y fechaFin son requeridos' });
+        }
+
+        const pedidos = await Pedido.find({
+            fechaPedido: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
+        }).populate('mandiles');
+
+        res.status(200).json(pedidos);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 // Generar un PDF de un pedido por ID
 export const generatePedidoPDF = async (req, res) => {
