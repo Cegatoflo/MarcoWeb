@@ -149,7 +149,7 @@ export function Inventoryview() {
                             {filteredItems.length > 0 ? (
                                 filteredItems.map((item) => (
                                     <tr key={item._id}>
-                                        <td>{item.id_mandil}</td>
+                                        <td>{item.id}</td>
                                         <td>{item.seccion}</td>
                                         <td>{item.ubicacion}</td>
                                         <td>{item.color}</td>
