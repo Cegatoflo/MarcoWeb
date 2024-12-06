@@ -1,10 +1,6 @@
-// InventoryView.jsx
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Helmet } from "react-helmet";
-import { Modal, Button, Form } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function Inventoryview() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -12,10 +8,11 @@ export function Inventoryview() {
     const [selectedItem, setSelectedItem] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
     const [mandilData, setMandilData] = useState({
+        id: '',
         seccion: '',
         ubicacion: '',
-        color: '',
-        estado: false
+        color: 'rojo', // Valor por defecto
+        estado: false // Siempre será false al agregar
     });
 
     useEffect(() => {
@@ -34,10 +31,11 @@ export function Inventoryview() {
     const handleEditItem = (item) => {
         setSelectedItem(item);
         setMandilData({
+            id: item.id,
             seccion: item.seccion,
             ubicacion: item.ubicacion,
             color: item.color,
-            estado: item.estado
+            estado: item.estado // Mantener el estado actual
         });
         setModalVisible(true);
     };
@@ -52,6 +50,12 @@ export function Inventoryview() {
     };
 
     const handleSubmit = async () => {
+        // Validar que todos los campos estén completos
+        if (!mandilData.id || !mandilData.seccion || !mandilData.ubicacion || !mandilData.color) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
+
         if (selectedItem) {
             // Editar mandil
             try {
@@ -64,7 +68,7 @@ export function Inventoryview() {
         } else {
             // Crear mandil
             try {
-                await axios.post('https://pyfjs.onrender.com/api/mandil/mandiles', mandilData, { withCredentials: true });
+                await axios.post('https://pyfjs.onrender.com/api/mandil/mandiles', { ...mandilData, estado: false }, { withCredentials: true });
                 fetchInventory();
                 resetForm();
             } catch (error) {
@@ -76,7 +80,7 @@ export function Inventoryview() {
     const resetForm = () => {
         setModalVisible(false);
         setSelectedItem(null);
-        setMandilData({ seccion: '', ubicacion: '', color: '', estado: false });
+        setMandilData({ id: '', seccion: '', ubicacion: '', color: 'rojo', estado: false });
     };
 
     const filteredItems = inventoryItems.filter(item =>
@@ -94,39 +98,34 @@ export function Inventoryview() {
             <Helmet>
                 <title>Inventario | TOTOS</title>
             </Helmet>
-            <div className="dashboard-container">
-                <h1 className="dashboard-title">Inventario de Mandiles</h1>
+            <div>
+                <h1>Inventario de Mandiles</h1>
 
-                <div className="search-bar">
+                <div>
                     <input
                         type="text"
-                        className="form-control form-control-sm"
                         placeholder="Buscar por color..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
 
-                <div className="mandil-summary">
+                <div>
                     <h3>Resumen de Mandiles por Color</h3>
-                    <div className="cards-container">
+                    <div>
                         {Object.keys(mandilCountsByColor).map(color => (
-                            <div key={color} className="mandil-card">
-                                <div className="card-header" style={{ backgroundColor: color }}>
-                                    {color}
-                                </div>
-                                <div className="card-body">
-                                    Cantidad: {mandilCountsByColor[color]}
-                                </div>
-                            </div>
+                            <div key={color} style={{ backgroundColor: color, padding: '10px', color: 'white' }}>
+                                {color}: Cantidad: {mandilCountsByColor[color]}
+ </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="inventory-table-container">
-                    <table className="table table-bordered table-sm">
+                <div>
+                    <table>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Sección</th>
                                 <th>Ubicación</th>
                                 <th>Color</th>
@@ -138,117 +137,81 @@ export function Inventoryview() {
                             {filteredItems.length > 0 ? (
                                 filteredItems.map((item) => (
                                     <tr key={item._id}>
+                                        <td>{item.id}</td>
                                         <td>{item.seccion}</td>
                                         <td>{item.ubicacion}</td>
                                         <td>{item.color}</td>
                                         <td>{item.estado ? 'No disponible' : 'Disponible'}</td>
                                         <td>
-                                            <Button variant="info" size="sm" onClick={() => handleEditItem(item)}>Editar</Button>
-                                            <Button variant="danger" size="sm" onClick={() => handleDeleteItem(item._id)}>Eliminar</Button>
+                                            <button onClick={() => handleEditItem(item)}>Editar</button>
+                                            <button onClick={() => handleDeleteItem(item._id)}>Eliminar</button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="5">No se encontraron mandiles para el color buscado.</td>
+                                    <td colSpan="6">No se encontraron mandiles para el color buscado.</td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
-                    <Button variant="primary" size="sm" onClick={() => setModalVisible(true)}>Agregar Mandil</Button>
+                    <button onClick={() => setModalVisible(true)}>Agregar Mandil</button>
                 </div>
 
-                <Modal show={modalVisible} onHide={resetForm} centered>
-                    <Modal.Header closeButton>
-                        <Modal.Title>{selectedItem ? "Editar Mandil" : "Agregar Mandil"}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group controlId="formSeccion">
-                                <Form.Label>Sección</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Ingrese la sección"
-                                    value={mandilData.seccion}
-                                    onChange={(e) => setMandilData({ ...mandilData, seccion: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formUbicacion">
-                                <Form.Label>Ubicación</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Ingrese la ubicación"
-                                    value={mandilData.ubicacion}
-                                    onChange={(e) => setMandilData({ ...mandilData, ubicacion: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formColor">
-                                <Form.Label>Color</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Ingrese el color"
-                                    value={mandilData.color}
-                                    onChange={(e) => setMandilData({ ...mandilData, color: e.target.value })}
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="formEstado">
-                                <Form.Check
-                                    type="checkbox"
-                                    label="No disponible"
-                                    checked={mandilData.estado}
-                                    onChange={(e) => setMandilData({ ...mandilData, estado: e.target.checked })}
-                                />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" size="sm" onClick={resetForm}>Cancelar</Button>
-                        <Button variant="primary" size="sm" onClick={handleSubmit}>
-                            {selectedItem ? "Confirmar Edición" : "Agregar Mandil"}
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                {modalVisible && (
+                    <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '5px', width: '400px' }}>
+                            <span onClick={resetForm} style={{ cursor: 'pointer', float: 'right', fontSize: '20px' }}>&times;</span>
+                            <h2>{selectedItem ? "Editar Mandil" : "Agregar Mandil"}</h2>
+                            <form>
+                                <div>
+                                    <label>ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ingrese el ID"
+                                        value={mandilData.id}
+                                        onChange={(e) => setMandilData({ ...mandilData, id: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label>Sección</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ingrese la sección"
+                                        value={mandilData.seccion}
+                                        onChange={(e) => setMandilData({ ...mandilData, seccion: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label>Ubicación</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Ingrese la ubicación"
+                                        value={mandilData.ubicacion}
+                                        onChange={(e) => setMandilData({ ...mandilData, ubicacion: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label>Color</label>
+                                    <select
+                                        value={mandilData.color}
+                                        onChange={(e) => setMandilData({ ...mandilData, color: e.target.value })}
+                                    >
+                                        <option value="rojo">Rojo</option>
+                                        <option value="verde">Verde</option>
+                                        <option value="rosa">Rosa</option>
+                                        <option value="azul">Azul</option>
+                                    </select>
+                                </div>
+                                <button type="button" onClick={resetForm}>Cancelar</button>
+                                <button type="button" onClick={handleSubmit}>
+                                    {selectedItem ? "Confirmar Edición" : "Agregar Mandil"}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
-
-            <style jsx>{`
-                .dashboard-container {
-                    padding: 20px;
-                }
-                .dashboard-title {
-                    color: #007bff;
-                }
-                .search-bar input {
-                    width: 100%;
-                    margin-bottom: 20px;
-                }
-                .inventory-table-container {
-                    margin-top: 20px;
-                }
-                .inventory-table-container table {
-                    width: 100%;
-                    margin-bottom: 20px;
-                }
-                .mandil-summary {
-                    margin-top: 20px;
-                }
-                .cards-container {
-                    display: flex;
-                    gap: 15px;
-                }
-                .mandil-card {
-                    width: 150px;
-                    padding: 15px;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                }
-                .card-header {
-                    padding: 10px;
-                    color: white;
-                    font-weight: bold;
-                    text-align: center;
-                }
-            `}</style>
         </>
     );
 }
-
