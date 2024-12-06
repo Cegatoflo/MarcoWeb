@@ -2,24 +2,50 @@ import Mandil from '../models/mandil.model.js';
 
 export const createMandil = async (req, res) => {
     try {
+        // Buscar el mandil con el ID más reciente
         const lastMandil = await Mandil.findOne().sort({ _id: -1 }).exec();
-        const lastId = lastMandil ? lastMandil.id_mandil : 'mandil_000';
+        const lastId = lastMandil ? lastMandil.id : 'M0000'; // Default a 'M0000' si no existe ningún mandil
 
-        const numberPart = parseInt(lastId.split('_')[1], 10);
-        const newId = `mandil_${String(numberPart + 1).padStart(3, '0')}`;
+        // Verificar si el ID tiene el formato esperado
+        const idPrefix = lastId.slice(0, 1); // Extraer la letra (M)
+        const numberPart = parseInt(lastId.slice(1), 10); // Extraer el número
 
+        if (idPrefix !== 'M' || isNaN(numberPart)) {
+            // Si el ID no tiene el formato correcto, se empieza con 'M0000'
+            console.log('ID inicial inválido, generando desde M0000');
+            const newId = `M0001`; // Comienza desde M0001 en lugar de M0000
+            const mandil = new Mandil({
+                ...req.body,
+                id: newId,  // Usar el nuevo ID generado
+                estado: false,  // Estado por defecto
+            });
+
+            // Guardar el mandil en la base de datos
+            await mandil.save();
+            return res.status(201).json(mandil);
+        }
+
+        // Generar el nuevo ID (incrementando el número)
+        const newId = `M${String(numberPart + 1).padStart(4, '0')}`;
+
+        // Crear el nuevo mandil con el ID generado
         const mandil = new Mandil({
             ...req.body,
-            id: newId,
-            estado: false, 
+            id: newId,  // Usar el nuevo ID generado
+            estado: false,  // Estado por defecto
         });
 
+        // Guardar el mandil en la base de datos
         await mandil.save();
+
+        // Enviar la respuesta con el mandil creado
         res.status(201).json(mandil);
     } catch (error) {
+        // Enviar error en caso de fallo
         res.status(400).json({ error: error.message });
     }
 };
+
 
 // Obtener todos los mandiles
 export const getMandiles = async (req, res) => {
