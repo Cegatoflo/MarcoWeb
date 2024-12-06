@@ -143,15 +143,17 @@ export const searchPedidosByRuc = async (req, res) => {
     }
 };
 
-// Buscar pedidos por fecha
+// Buscar pedidos por fecha (rango de fechas)
 export const searchPedidosByFecha = async (req, res) => {
     try {
         const { fechaInicio, fechaFin } = req.query;
 
+        // Verificar que ambos parámetros de fecha están presentes
         if (!fechaInicio || !fechaFin) {
             return res.status(400).json({ error: 'Los parámetros de fechaInicio y fechaFin son requeridos' });
         }
 
+        // Filtrar los pedidos por el rango de fechas
         const pedidos = await Pedido.find({
             fechaPedido: { $gte: new Date(fechaInicio), $lte: new Date(fechaFin) }
         }).populate('mandiles');
