@@ -110,7 +110,7 @@ export function Orderviews() {
                 responseType: 'blob',
                 withCredentials: true,
             });
-            const url = window.URL.createObjectURL(new Blob([ response.data]));
+            const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
             link.setAttribute('download', `pedido-${id}.pdf`);
@@ -144,40 +144,51 @@ export function Orderviews() {
             <Helmet>
                 <title>Órdenes</title>
             </Helmet>
-            <h1>Lista de Órdenes</h1>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por RUC"
-            />
-            <button onClick={handleSearch}>Buscar</button>
+            <div className="title-container">
+                <h1>Lista de Órdenes</h1>
+            </div>
+            <div className="filters-container">
+                <input
+                    className="filter-input"
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar por RUC"
+                />
+                <button className="filter-button" onClick={handleSearch}>Buscar</button>
 
-            <label>Filtrar por Estado:</label>
-            <select value={estadoFilter} onChange={(e) => setEstadoFilter(e.target.value)}>
-                <option value="">Seleccionar Estado</option>
-                <option value="pendiente">Pendiente</option>
-                <option value="en_proceso">En Proceso</option>
-                <option value="completado">Completado</option>
-                <option value="cancelado">Cancelado</option>
-            </select>
-            <button onClick={handleFilterByEstado}>Filtrar</button>
+                <label className="white">Filtrar por Estado:</label>
+                <select className="filter-select" value={estadoFilter} onChange={(e) => setEstadoFilter(e.target.value)}
+                    style={{ width: '200px' }}>
+                    <option value="">Seleccionar Estado</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En Proceso</option>
+                    <option value="completado">Completado</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
+                <button className="filter-button" onClick={handleFilterByEstado}>Filtrar</button>
+            </div>
+            <div className="filters-container">
+                <label className="white">Filtrar por Fecha:</label>
+                <input
+                    className="filter-input"
+                    type="date"
+                    value={dateFilter.startDate}
+                    onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
+                />
+                <input
+                    className="filter-input"
+                    type="date"
+                    value={dateFilter.endDate}
+                    onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
+                />
 
-            <label>Filtrar por Fecha:</label>
-            <input
-                type="date"
-                value={dateFilter.startDate}
-                onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
-            />
-            <input
-                type="date"
-                value={dateFilter.endDate}
-                onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
-            />
-            <button onClick={handleFilterByDate}>Filtrar por Fecha</button>
-
-            <button onClick={() => { setShowMandilesPanel(true); setIsEditing(false); }}>Agregar Pedido</button>
-            <table>
+                <button className="filter-button" onClick={handleFilterByDate}>Filtrar por Fecha</button>
+            </div>
+            <div className="add-form">
+                <button onClick={() => { setShowMandilesPanel(true); setIsEditing(false); }}>Agregar Pedido</button>
+            </div>
+            <table className='general-table'>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -194,7 +205,7 @@ export function Orderviews() {
                             <td>{order.ruc}</td>
                             <td>{order.fechaPedido}</td>
                             <td>{order.estado}</td>
-                            <td>
+                            <td className="buttons-table">
                                 <button onClick={() => handleEditOrder(order)}>Editar</button>
                                 <button onClick={() => toggleOrderDetails(order)}>Detalles</button>
                                 <button onClick={() => handleGeneratePDF(order._id)}>Descargar PDF</button>
@@ -206,56 +217,64 @@ export function Orderviews() {
             </table>
 
             {selectedOrder && (
-                <div className="order-details-panel">
-                    <h2>Detalles del Pedido</h2>
-                    <p><strong>ID:</strong> {selectedOrder.idPedido}</p>
-                    <p><strong>Cliente:</strong> {selectedOrder.ruc}</p>
-                    <p><strong>Fecha:</strong> {selectedOrder.fechaPedido}</p>
-                    <p><strong>Estado:</strong> {selectedOrder.estado}</p>
-                    <p><strong>Mandiles Seleccionados:</strong></p>
-                    <ul>
-                        {selectedOrder.mandiles.map(mandil => (
-                            <li key={mandil.id}>
-                                {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
-                            </li>
-                        ))}
-                    </ul>
-                    <button onClick={() => setSelectedOrder(null)}>Cerrar</button>
+                <div className="modal-t">
+                    <div className="modal-ps white">
+                        <h2>Detalles del Pedido</h2>
+                        <p><strong>ID:</strong> {selectedOrder.idPedido}</p>
+                        <p><strong>Cliente:</strong> {selectedOrder.ruc}</p>
+                        <p><strong>Fecha:</strong> {selectedOrder.fechaPedido}</p>
+                        <p><strong>Estado:</strong> {selectedOrder.estado}</p>
+                        <p><strong>Mandiles Seleccionados:</strong></p>
+                        <ul>
+                            {selectedOrder.mandiles.map(mandil => (
+                                <li key={mandil.id}>
+                                    {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="buttons-modal">
+                            <button className="button-cancelar" onClick={() => setSelectedOrder(null)}>Cerrar</button>
+                        </div>
+                    </div>
                 </div>
             )}
 
             {showMandilesPanel && (
-                <div className="mandiles-panel">
-                    <h2>{isEditing ? 'Editar Pedido' : 'Agregar Pedido'}</h2>
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type="text"
-                            value={ ruc}
-                            onChange={(e) => setRuc(e.target.value)}
-                            placeholder="Ingrese RUC"
-                            required
-                        />
-                        <h3>Seleccionar Mandiles</h3>
-                        {mandiles.map(mandil => (
-                            <div key={mandil.id}>
-                                <input
-                                    type="checkbox"
-                                    value={mandil.id}
-                                    checked={selectedMandiles.includes(mandil.id)} // Preseleccionar mandiles si estamos editando
-                                    onChange={(e) => {
-                                        if (e.target.checked) {
-                                            setSelectedMandiles([...selectedMandiles, mandil.id]);
-                                        } else {
-                                            setSelectedMandiles(selectedMandiles.filter(id => id !== mandil.id));
-                                        }
-                                    }}
-                                />
-                                {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
+                <div className="modal-t">
+                    <div className="modal-ps">
+                        <h2>{isEditing ? 'Editar Pedido' : 'Agregar Pedido'}</h2>
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                type="text"
+                                value={ruc}
+                                onChange={(e) => setRuc(e.target.value)}
+                                placeholder="Ingrese RUC"
+                                required
+                            />
+                            <h3 className="white">Seleccionar Mandiles</h3>
+                            {mandiles.map(mandil => (
+                                <div key={mandil.id} className="white">
+                                    <input
+                                        type="checkbox"
+                                        value={mandil.id}
+                                        checked={selectedMandiles.includes(mandil.id)} // Preseleccionar mandiles si estamos editando
+                                        onChange={(e) => {
+                                            if (e.target.checked) {
+                                                setSelectedMandiles([...selectedMandiles, mandil.id]);
+                                            } else {
+                                                setSelectedMandiles(selectedMandiles.filter(id => id !== mandil.id));
+                                            }
+                                        }}
+                                    />
+                                    {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
+                                </div>
+                            ))}
+                            <div className="buttons-modal">
+                                <button className="button-aceptar" type="submit">{isEditing ? 'Actualizar Pedido' : 'Agregar Pedido'}</button>
+                                <button className="button-cancelar" type="button" onClick={() => setShowMandilesPanel(false)}>Cancelar</button>
                             </div>
-                        ))}
-                        <button type="submit">{isEditing ? 'Actualizar Pedido' : 'Agregar Pedido'}</button>
-                        <button type="button" onClick={() => setShowMandilesPanel(false)}>Cancelar</button>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>
