@@ -61,7 +61,7 @@ export function Inventoryview() {
 
     const handleSubmit = async () => {
         // Validar que todos los campos estén completos
-        if (!mandilData.seccion || !mandilData.ubicacion || !mandilData.color) {
+        if (!mandilData.ubicacion || !mandilData.color) {
             alert("Por favor, complete todos los campos.");
             return;
         }
@@ -90,7 +90,7 @@ export function Inventoryview() {
     const resetForm = () => {
         setModalVisible(false);
         setSelectedItem(null);
-        setMandilData({ seccion: '', ubicacion: '', color: 'rojo' });
+        setMandilData({ ubicacion: '', color: 'rojo' });
     };
 
     const applyFilters = () => {

@@ -136,6 +136,7 @@ export function Orderviews() {
             setSelectedOrder(null);
         } else {
             setSelectedOrder(order);
+            console.log(order);
         }
     };
 
@@ -220,13 +221,14 @@ export function Orderviews() {
                 <div className="modal-t">
                     <div className="modal-ps white">
                         <h2>Detalles del Pedido</h2>
+                        {console.log('selectedOrder:', selectedOrder)}
                         <p><strong>ID:</strong> {selectedOrder.idPedido}</p>
                         <p><strong>Cliente:</strong> {selectedOrder.ruc}</p>
                         <p><strong>Fecha:</strong> {selectedOrder.fechaPedido}</p>
                         <p><strong>Estado:</strong> {selectedOrder.estado}</p>
                         <p><strong>Mandiles Seleccionados:</strong></p>
                         <ul>
-                            {selectedOrder.mandiles.map(mandil => (
+                            {selectedOrder.mandiles?.map((mandil) => (
                                 <li key={mandil.id}>
                                     {mandil.nombre} - ID: {mandil.id} - Color: {mandil.color}
                                 </li>
