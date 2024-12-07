@@ -5,6 +5,6 @@ import { Router } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const cr = ReactDOM.createRoot(document.getElementById('root'))
-cr.render(
+ cr.render(
   <App />
 )
