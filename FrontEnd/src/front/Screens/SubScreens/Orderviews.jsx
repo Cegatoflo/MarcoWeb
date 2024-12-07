@@ -10,6 +10,7 @@ export function Orderviews() {
     const [ruc, setRuc] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [estadoFilter, setEstadoFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState({ startDate: '', endDate: '' }); // Filtro de fechas
     const [showMandilesPanel, setShowMandilesPanel] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null); // Estado para el pedido seleccionado
 
@@ -20,7 +21,14 @@ export function Orderviews() {
 
     const fetchOrders = async () => {
         try {
-            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos', { withCredentials: true });
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos', {
+                params: {
+                    startDate: dateFilter.startDate,
+                    endDate: dateFilter.endDate,
+                    estado: estadoFilter
+                },
+                withCredentials: true
+            });
             setOrders(response.data);
         } catch (error) {
             console.error("Error fetching orders", error);
@@ -70,15 +78,11 @@ export function Orderviews() {
     };
 
     const handleFilterByEstado = async () => {
-        try {
-            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos/search/estado', {
-                params: { estado: estadoFilter },
-                withCredentials: true,
-            });
-            setOrders(response.data);
-        } catch (error) {
-            console.error("Error filtering orders", error);
-        }
+        fetchOrders();
+    };
+
+    const handleFilterByDate = async () => {
+        fetchOrders();
     };
 
     const handleGeneratePDF = async (id) => {
@@ -103,12 +107,13 @@ export function Orderviews() {
             await axios.delete(`https://pyfjs.onrender.com/api/pedido/pedidos/${id}`, { withCredentials: true });
             alert('Pedido eliminado exitosamente');
             fetchOrders(); // Volver a obtener las órdenes después de eliminar
-        } catch (error) {console.error("Error deleting order", error);
+        } catch (error) {
+            console.error("Error deleting order", error);
         }
     };
 
     const toggleOrderDetails = (order) => {
-        if (selectedOrder && selectedOrder.idPedido === order.idPedido) {
+        if (selectedOrder && selectedOrder._id === order._id) {
             setSelectedOrder(null); // Cerrar detalles si ya está abierto
         } else {
             setSelectedOrder(order); // Abrir detalles del nuevo pedido
@@ -128,7 +133,30 @@ export function Orderviews() {
                 placeholder="Buscar por RUC"
             />
             <button onClick={handleSearch}>Buscar</button>
-            <button onClick={handleFilterByEstado}>Filtrar por Estado</button>
+
+            <label>Filtrar por Estado:</label>
+            <select value={estadoFilter} onChange={(e) => setEstadoFilter(e.target.value)}>
+                <option value="">Seleccionar Estado</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En Proceso</option>
+                <option value="completado">Completado</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
+            <button onClick={handleFilterByEstado}>Filtrar</button>
+
+            <label>Filtrar por Fecha:</label>
+            <input
+                type="date"
+                value={dateFilter.startDate}
+                onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
+            />
+            <input
+                type="date"
+                value={dateFilter.endDate}
+                onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
+            />
+            <button onClick={handleFilterByDate}>Filtrar por Fecha</button>
+
             <button onClick={() => setShowMandilesPanel(true)}>Agregar Pedido</button>
             <table>
                 <thead>
@@ -142,15 +170,15 @@ export function Orderviews() {
                 </thead>
                 <tbody>
                     {orders.map(order => (
-                        <tr key={order.idPedido}>
+                        <tr key={order._id}>
                             <td>{order.idPedido}</td>
                             <td>{order.ruc}</td>
                             <td>{order.fechaPedido}</td>
                             <td>{order.estado}</td>
                             <td>
                                 <button onClick={() => toggleOrderDetails(order)}>Detalles</button>
-                                <button onClick={() => handleGeneratePDF(order.idPedido)}>Descargar PDF</button>
-                                <button onClick={() => handleDeleteOrder(order.idPedido)}>Eliminar</button>
+                                <button onClick={() => handleGeneratePDF(order._id)}>Descargar PDF</button>
+                                <button onClick={() => handleDeleteOrder(order._id)}>Eliminar</button>
                             </td>
                         </tr>
                     ))}
