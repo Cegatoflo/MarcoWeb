@@ -20,7 +20,7 @@ export function Reportsview() {
     // Función para obtener mandiles en estado true y agrupar por color
     const fetchMandilDataTrue = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/api/mandil/mandiles', { params: { estado: 'true' }, withCredentials: true });
+            const response = await axios.get('https://pyfjs.onrender.com/api/mandil/mandiles', { params: { estado: 'true' }, withCredentials: true });
             const mandiles = response.data;
 
             // Agrupar mandiles por color
@@ -43,7 +43,7 @@ export function Reportsview() {
     // Función para obtener todos los mandiles y agrupar por color
     const fetchMandilDataAll = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/api/mandil/mandiles', { withCredentials: true });
+            const response = await axios.get('https://pyfjs.onrender.com/api/mandil/mandiles', { withCredentials: true });
             const mandiles = response.data;
 
             // Agrupar mandiles por color
@@ -66,7 +66,7 @@ export function Reportsview() {
     // Función para obtener la cantidad de pedidos por mes
     const fetchPedidosPorMes = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/api/pedido/pedidos', { withCredentials: true });
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos', { withCredentials: true });
             const pedidos = response.data;
 
             // Agrupar pedidos por mes
@@ -90,7 +90,7 @@ export function Reportsview() {
     // Función para obtener el estado de los pedidos por RUC
     const fetchPedidosPorRuc = async () => {
         try {
-            const response = await axios.get('http://localhost:4000/api/pedido/pedidos', { withCredentials: true });
+            const response = await axios.get('https://pyfjs.onrender.com/api/pedido/pedidos', { withCredentials: true });
             const pedidos = response.data;
 
             // Agrupar pedidos por RUC y estado
@@ -131,7 +131,7 @@ export function Reportsview() {
                             dataKey="value"
                         >
                             {mandilDataTrue.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random()*16777215).toString(16)}`} />
+                                <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} />
                             ))}
                         </Pie>
                         <Tooltip />
@@ -152,36 +152,37 @@ export function Reportsview() {
                             dataKey="value"
                         >
                             {mandilDataAll.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random()*16777215).toString(16)}`} />
+                                <Cell key={`cell-${index}`} fill={`#${Math.floor(Math.random() * 16777215).toString(16)}`} />
                             ))}
                         </Pie>
                         <Tooltip />
                         <Legend />
                     </PieChart>
                 </div>
-            </div>
 
-            {/* Gráfico de Líneas de Pedidos por Mes */}
-            <div className="big-card">
-                <h2>Fluctuación de Pedidos por Mes</h2>
-                <LineChart width={600} height={300} data={pedidosPorMes}>
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="cantidad" stroke="#8884d8" />
-                </LineChart>
-            </div>
 
-            {/* Gráfico de Barras de Estado de Pedidos por RUC */}
-            <div className="big-card">
-                <h2>Estado de Pedidos por RUC</h2>
-                <BarChart width={600} height={300} data={pedidosPorRuc}>
-                    <XAxis dataKey="ruc" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="estado" fill="#82ca9d" />
-                </BarChart>
+                {/* Gráfico de Líneas de Pedidos por Mes */}
+                <div className="big-card">
+                    <h2>Fluctuación de Pedidos por Mes</h2>
+                    <LineChart width={600} height={300} data={pedidosPorMes}>
+                        <XAxis dataKey="mes" />
+                        <YAxis />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="cantidad" stroke="#8884d8" />
+                    </LineChart>
+                </div>
+
+                {/* Gráfico de Barras de Estado de Pedidos por RUC */}
+                <div className="big-card">
+                    <h2>Estado de Pedidos por RUC</h2>
+                    <BarChart width={600} height={300} data={pedidosPorRuc}>
+                        <XAxis dataKey="ruc" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="estado" fill="#82ca9d" />
+                    </BarChart>
+                </div>
             </div>
         </>
     );
