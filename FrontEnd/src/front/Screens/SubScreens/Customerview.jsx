@@ -13,7 +13,7 @@ export function Customerview() {
         RUC: '',
     });
 
-    // Fetch customers when component mounts
+
     useEffect(() => {
         fetchCustomers();
     }, []);
