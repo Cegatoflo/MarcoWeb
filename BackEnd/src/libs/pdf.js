@@ -14,25 +14,10 @@ export const crearDocumentoPDF = (pedido) => {
     }
     doc.moveDown();
 
-    // Agrupar mandiles por color
-    const mandilesPorColor = {};
-    pedido.mandiles.forEach(mandil => {
-        const color = mandil.color;
-        if (!mandilesPorColor[color]) {
-            mandilesPorColor[color] = 0;
-        }
-        mandilesPorColor[color]++;
-    });
-
-    doc.text('Mandiles:', { underline: true });
+    // Mostrar la cantidad total de mandiles
+    const cantidadMandiles = pedido.mandiles.length;
+    doc.text(`Cantidad total de mandiles: ${cantidadMandiles}`);
     doc.moveDown();
-
-    // Escribir los mandiles agrupados por color
-    for (const color in mandilesPorColor) {
-        const cantidad = mandilesPorColor[color];
-        doc.text(`Color: ${color} - Cantidad: ${cantidad}`);
-        doc.moveDown();
-    }
 
     // Espacio para el precio
     doc.text('Precio: ______________________', { align: 'left' });
