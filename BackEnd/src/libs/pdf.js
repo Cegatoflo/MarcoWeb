@@ -14,22 +14,28 @@ export const crearDocumentoPDF = (pedido) => {
     }
     doc.moveDown();
 
-    // Imprimir los mandiles como una boleta
+    // Agrupar mandiles por color
+    const mandilesPorColor = {};
+    pedido.mandiles.forEach(mandil => {
+        const color = mandil.color;
+        if (!mandilesPorColor[color]) {
+            mandilesPorColor[color] = 0;
+        }
+        mandilesPorColor[color]++;
+    });
+
     doc.text('Mandiles:', { underline: true });
     doc.moveDown();
 
-    doc.fontSize(10);
-    doc.text('Código\tDescripción\tCantidad\tPrecio');
-    doc.moveDown();
-
-    pedido.mandiles.forEach((mandil) => {
-        doc.text(`${mandil.codigo}\t${mandil.descripcion}\t${mandil.cantidad}\t${mandil.precio}`);
+    // Escribir los mandiles agrupados por color
+    for (const color in mandilesPorColor) {
+        const cantidad = mandilesPorColor[color];
+        doc.text(`Color: ${color} - Cantidad: ${cantidad}`);
         doc.moveDown();
-    });
+    }
 
-    // Espacio para el precio total
-    doc.fontSize(12);
-    doc.text('Precio Total: ______________________', { align: 'left' });
+    // Espacio para el precio
+    doc.text('Precio: ______________________', { align: 'left' });
     doc.moveDown();
 
     return doc;
